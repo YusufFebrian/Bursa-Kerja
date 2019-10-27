@@ -1,0 +1,137 @@
+
+.tabs {
+    width: 100%;
+    position: absolute;
+    /* top: 50%;
+    left: 50%; */
+    /* -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%); */
+    /* transform: translate(-50%, -50%); */
+    /* overflow: hidden;  */
+}
+.tabs input {
+    display: none; }
+    .tabs input :checked + label {
+    background: #000000; }
+    .tabs input#tab1:checked ~ .line {
+    left: 0%; }
+    .tabs input#tab1:checked ~ .content-container #c1 {
+    opacity: 1; }
+    .tabs input#tab2:checked ~ .line {
+    left: 25%; }
+    .tabs input#tab2:checked ~ .content-container #c2 {
+    opacity: 1; }
+    .tabs input#tab3:checked ~ .line {
+    left: 50%; }
+    .tabs input#tab3:checked ~ .content-container #c3 {
+    opacity: 1; }
+    .tabs input#tab4:checked ~ .line {
+    left: 75%; }
+    .tabs input#tab4:checked ~ .content-container #c4 {
+    opacity: 1; }
+.tabs label {
+    display: inline-block;
+    font-size: 16px;
+    height: 36px;
+    line-height: 36px;
+    width: 25%;
+    text-align: center;
+    background: #f4f4f4;
+    color: #555;
+    position: relative;
+    -webkit-transition: 0.25s background ease;
+    -o-transition: 0.25s background ease;
+    transition: 0.25s background ease;
+    cursor: pointer; }
+    .tabs label::after {
+    content: "";
+    height: 2px;
+    width: 100%;
+    position: absolute;
+    display: block;
+    background: #ccc;
+    bottom: 0;
+    opacity: 0;
+    left: 0;
+    -webkit-transition: 0.25s ease;
+    -o-transition: 0.25s ease;
+    transition: 0.25s ease; }
+    .tabs label:hover::after {
+    opacity: 1; }
+.tabs .line {
+    position: absolute;
+    height: 2px;
+    background: #1E88E5;
+    width: 25%;
+    top: 34px;
+    left: 0;
+    -webkit-transition: 0.25s ease;
+    -o-transition: 0.25s ease;
+    transition: 0.25s ease; }
+.tabs .content-container {
+    background: #eee;
+    position: relative;
+    height: 100px;
+    font-size: 16px; }
+    .tabs .content-container .content {
+    position: absolute;
+    padding: 10px;
+    width: 100%;
+    top: 0;
+    opacity: 0;
+    -webkit-transition: 0.25s ease;
+    -o-transition: 0.25s ease;
+    transition: 0.25s ease;
+    color: #333; }
+    .tabs .content-container .content h3 {
+        font-weight: 200;
+        margin: 10px 0; }
+    .tabs .content-container .content p {
+        margin: 10px 0; }
+    .tabs .content-container .content p, .tabs .content-container .content i {
+        font-size: 13px; }
+
+         .tabs {
+           position: relative;   
+           min-height: 200px; /* This part sucks */
+           clear: both;
+           margin: 35px 0 25px;
+           background: white;
+         }
+         .tab {
+            display: table-cell;
+         }
+         .tab label {
+           background: #eee; 
+           padding: 10px; 
+           border: 1px solid #ccc; 
+           margin-left: -1px; 
+           position: relative;
+           left: 1px; 
+           top: -29px;
+           -webkit-transition: background-color .17s linear;
+         }
+         .tab [type=radio] {
+           display: none;   
+         }
+         .content {
+           position: absolute;
+           top: -1px;
+           left: 0;
+           background: white;
+           right: 0;
+           bottom: 0;
+           padding: 20px;
+           border: 1px solid #ccc; 
+           -webkit-transition: opacity .6s linear;
+           opacity: 0;
+         }
+         .tabs [type=radio]:checked ~ label {
+           background: white;
+           border-bottom: 1px solid white;
+           z-index: 2;
+         }
+         .tabs [type=radio]:checked ~ label ~ .content {
+           z-index: 1;
+           opacity: 1;
+         }
