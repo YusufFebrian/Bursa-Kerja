@@ -1,21 +1,14 @@
 import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, withRouter} from 'react-router-dom';
+import Select from 'react-dropdown-select';
 import { Pie } from 'react-chartjs-2';
 import Axios from 'axios';
-import Select from 'react-dropdown-select';
-import Skin from './skin';
 
-export default class Index extends Component {
+export default class Dashboard extends Component {
     constructor() {
         super();
+
         this.state = {
-            collapseClass: "panel-collapse collapse in show",
-            options_tahun: [],
-            options_prodi: [],
             options_jurusan: [],
-            filter_tahun: 0,
-            filter_prodi: 0,
-            filter_jurusan: 0,
             keterserapan: {
                 labels: [''],
                 datasets: [{
@@ -42,9 +35,10 @@ export default class Index extends Component {
                 }
             },
         }
-
-        this.renderChart = this.renderChart.bind(this);
+        
+        this.linkClick = this.linkClick.bind(this);
         this.changeFilter = this.changeFilter.bind(this);
+        this.renderChart = this.renderChart.bind(this);
     }
 
     componentWillMount() {
@@ -71,6 +65,21 @@ export default class Index extends Component {
         }).catch(error => console.log(error));
     }
 
+    linkClick(to) {
+        this.props.history.push(to)
+    }
+
+    changeFilter(type, data) {
+        let statename = 'filter_'+type;
+        let filvalue = (data && data.length ? data[0].value : 0);
+
+        this.setState({
+            [statename]: filvalue
+        })
+
+        this.renderChart(type, data);
+    }
+    
     renderChart(filter, selected) {
         let filter_nm = (filter ? filter : 'nodata');
         let filter_val = (selected && selected.length ? selected[0].value : 0);
@@ -97,97 +106,210 @@ export default class Index extends Component {
         }).catch(error => console.log(error));
     }
 
-    changeFilter(type, data) {
-        let statename = 'filter_'+type;
-        let filvalue = (data && data.length ? data[0].value : 0);
-
-        this.setState({
-            [statename]: filvalue
-        })
-
-        this.renderChart(type, data);
-    }
-
-    modal() {
-        return (
-            <div className="modal splash fade" id="splash" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style={{display: 'none'}}>
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h3 className="modal-title custom-font">I'm a modal!</h3>
-                        </div>
-                        <div className="modal-body">
-                            <p>This sure is a fine modal, isn't it?</p>
-
-                            <p>Modals are streamlined, but flexible, dialog prompts with the minimum required functionality and smart defaults.</p>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn btn-default btn-border">Submit</button>
-                            <button className="btn btn-default btn-border" data-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     render() {
         return (
             <span>
-                <Skin/>
-                <div className="contents">
-                    <div className="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                        <div className="panel">
-                            <div className="panel-heading" role="tab" id="headingOne">
-                                <h4 className="panel-title">
-                                    <a id="filter" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne" className="collapsed">
-                                        Filter (klik untuk buka/tutup)
-                                    </a>
-                                </h4>
+                <nav className="navbar navbar-expand-lg navbar-light bg-white">
+                    <div className="container">
+                        <a className="navbar-brand" href="#">
+                            <img src="/image/logo_skariga.png" height="40" className="float-lefts"/>
+                            <b className="float-lefts ml-3" style={{ fontSize: "25px"}}>BKI Skariga</b>
+                        </a>
+                        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span className="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul className="navbar-nav ml-auto">
+                                <li className="nav-item mr-1 active">
+                                    <a className="nav-link" onClick={() => this.linkClick('/')}>Home</a>
+                                </li>
+                                <li className="nav-item mr-1">
+                                    <a className="nav-link" onClick={() => this.linkClick('/cari-lowongan')}>Cari Lowongan</a>
+                                </li>
+                                <li className="nav-item mr-1">
+                                    <a className="nav-link" onClick={() => this.linkClick('/pasang')}>Pasang Lowongan</a>
+                                </li>
+                                <li className="nav-item mr-1">
+                                    <a href="/login" className="btn btn-primary">LOGIN</a>
+                                </li>
+                                <li className="nav-item mr-1">
+                                    <a href="/daftar" className="btn btn-success">DAFTAR</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <div className="content-area">
+                    <div className="container text-center text-white">
+                        <h1 className="font-weight-bold mt-0">BKI Skariga</h1>
+                        <h4>Cari lowongan sesuai dengan keahlianmu.</h4>
+                        <div className="row px-5 mx-5 mt-20">
+                            <div className="col-lg-7 pr-0">
+                                <input type="text" className="form-control bg-light" aria-label="Large" placeholder="Cari Posisi atau Perusahaan" />
                             </div>
-                            <div id="collapseOne" className={this.state.collapseClass} role="tabpanel" aria-labelledby="headingOne" aria-expanded="false">
-                                <div className="panel-body">
-                                    <div className="col-md-12 p-0">
-                                        <div className="col-md-3 pl-0 mb-3">
-                                            <label className="col-md-12 pl-0">Tahun Ajaran</label>
-                                            <Select clearable={true} options={this.state.options_tahun} 
-                                            onChange={(values) => {this.renderChart('tahun', values); this.changeFilter('tahun', values)}} />
-                                        </div>
-                                        <div className="col-md-3 pl-0 mb-3">
-                                            <label className="col-md-12 pl-0">Departemen</label>
-                                            <Select clearable={true} options={this.state.options_prodi} 
-                                            onChange={(values) => {this.renderChart('prodi', values); this.changeFilter('prodi', values)}} />
-                                        </div>
-                                        <div className="col-md-3 pl-0 mb-3">
-                                            <label className="col-md-12 pl-0">Jurusan</label>
-                                            <Select clearable={true} options={this.state.options_jurusan} 
-                                            onChange={(values) => {this.renderChart('jurusan', values); this.changeFilter('jurusan', values)}} />
-                                        </div>
-                                        <button className="btn btn-primary mb-10" data-toggle="modal" data-target="#splash">3D Sign</button>
-                                    </div>
-                                </div>
+                            <div className="col-lg-4 px-0">
+                                <Select clearable={true} options={this.state.options_jurusan} 
+                                className="form-control bg-light" placeholder="Jurusan" />
+                            </div>
+                            <div className="col-lg-1 pl-0">
+                                <button className="btn btn-warning h-100 float-left"><i className="fa fa-search"></i></button>
                             </div>
                         </div>
                     </div>
-                    <div className="panel">
-                        <div className="panel-heading">
-                            <span class="panel-title">Diagram Keterserapan</span>
-                            <button type="submit" className="btn btn-primary float-right" onClick={() => this.props.history.push('/keterserapan/add')}> Data </button>
+                </div>
+                <div className="jumbotron bg-transparent py-0">
+                    <div className="row">
+                        <div className="col-lg-6 border-right border-bottom text-center py-5 px-5">
+                            <h3>Siswa / Alumni</h3>
+                            <p className="w-50 m-auto">Daftar lowongan dan peroleh peluang kerja sesuai dengan keahlianmu.</p>
                         </div>
-                        <div className="panel-body">
-                            <div className="col-md-12 p-0">
-                                <div style={{height: '450px'}}>
-                                    <Pie data={this.state.keterserapan} options={this.state.chartOptions} />
+                        <div className="col-lg-6 border-left border-bottom text-center py-5 px-5">
+                            <h3>Perusahaan</h3>
+                            <p className="w-50 m-auto">Pasang iklan lowongan agar terhubung dengan siswa / alumni yang paling potensial.</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="jumbotron bg-transparent ">
+                    <div className="container">
+                        <h1 className="text-center font-weight-bold">DATA KETERSERAPAN</h1>
+                        <div className="row justify-content-center">
+                            <div className="col-lg-3 pl-0 mb-3">
+                                <label className="pl-0">Tahun Ajaran</label>
+                                <Select clearable={true} options={this.state.options_tahun} placeholder="Semua"
+                                onChange={(values) => {this.renderChart('tahun', values); this.changeFilter('tahun', values)}} />
+                            </div>
+                            <div className="col-lg-3 pl-0 mb-3">
+                                <label className="pl-0">Departemen</label>
+                                <Select clearable={true} options={this.state.options_prodi} placeholder="Semua" 
+                                onChange={(values) => {this.renderChart('prodi', values); this.changeFilter('prodi', values)}} />
+                            </div>
+                            <div className="col-lg-3 pl-0 mb-3">
+                                <label className="pl-0">Jurusan</label>
+                                <Select clearable={true} options={this.state.options_jurusan} placeholder="Semua"
+                                onChange={(values) => {this.renderChart('jurusan', values); this.changeFilter('jurusan', values)}} />
+                            </div>
+                        </div>
+                        <div style={{height: '500px'}}>
+                            <Pie data={this.state.keterserapan} options={this.state.chartOptions} />
+                        </div>
+                    </div>
+                </div>
+                <div className="jumbotron bg-white py-0">
+                    <div className="container py-5 px-0">
+                        <h2 className="text-center font-weight-bold">Partner Industri</h2>
+                        <div className="slider">
+                            <div className="slide-track">
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/1.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/2.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/3.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/4.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/5.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/6.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/7.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/1.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/2.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/3.png" height="100" width="250" alt="" />
+                                </div>
+                                <div className="slide">
+                                    <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/557257/4.png" height="100" width="250" alt="" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div className="jumbotron bg-dark mb-0">
+                    <div className="container">
+                        <div className="row">
+                            <div className="col-lg-3 border-right border-secondary">
+                                <p className="h4 text-white font-weight-bold">Tentang BKI</p>
+                                <p className="h5 text-secondary mt-3">BKI adalah badan yang bergerak untuk mempermudah siswa / alumni mencari pekerjaan, situs BKI hadir sejak 2019 mempermudah cari pekerjaan dan perekrutan karyawan.</p>
+                            </div>
+                            <div className="col-lg-3 border-right border-secondary">
+                                <p className="h4 text-white font-weight-bold">Bantuan</p>
+                                <ul className="list-unstyled h5 mt-3">
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">FAQ</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Pusat Bantuan</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Kebijakan Privasi</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Kondisi dan Ketentuan</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="col-lg-3 border-right border-secondary">
+                                <p className="h4 text-white font-weight-bold">Blog</p>
+                                <ul className="list-unstyled h5 mt-3">
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">SSB SMK PGRI 3 Malang</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Facebook</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Youtube</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary">Instagram</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="col-lg-3">
+                                <p className="h4 text-white font-weight-bold">Hubungi Kami</p>
+                                <ul className="list-unstyled h5 mt-3">
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-phone"></i> +62 890 2823 1293</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-envelope"></i> skariga@gmail.com</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-twiter"></i> Twiter</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-facebook-square"></i> Facebook</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-youtube"></i> Youtube</a>
+                                    </li>
+                                    <li className="mb-1">
+                                        <a href="/sosmed" className="text-secondary"><i className="fa fa-instagram"></i> Instagram</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="jumbotron bg-dark py-2 mb-0 border-top border-secondary">
+                    <div className="container">
+                        Copyright &copy; BKI Skariga - All Rights Reserved
+                    </div>
+                </div>
             </span>
-        );
+        )
     }
 }
-
-// if (document.getElementById('target')) {
-//     ReactDOM.render(<Index />, document.getElementById('target'));
-// }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Anouar\Fpdf\Facades\Fpdf;
 use App\MainModel;
 
 class MainController extends Controller
@@ -17,11 +18,15 @@ class MainController extends Controller
         }
     }
 
+    public function dashboard() {
+        return view('land');
+    }
+
     public function islogin(){
         if (!Session::get('logins')) {
             return view('index');
         } else {
-            return redirect('/');
+            return redirect('/dashboard');
         }
     }
 
@@ -69,6 +74,54 @@ class MainController extends Controller
             $data['lain'] += $value->lain;
         }
         return response()->json($data);
+    }
+
+    public function addProcess(Request $request) {
+        $data_insert = [
+            'jurusanid' => $request->jurusan,
+            'thn_ajaran' => $request->tahun,
+            'jumlah' => $request->jumlah,
+            'kerja' => $request->kerja,
+            'kuliah' => $request->kuliah,
+            'wirausaha' => $request->wirausaha,
+            'militer' => $request->militer,
+            'lain' => $request->lain
+        ];
+        // dd($data_insert);
+        $insert = MainModel::insertData($data_insert);
+        
+        if ($insert) {
+            return response()->json(['goal'=>true]);
+        } else {
+            return response()->json(['goal'=>false]);
+        }
+    }
+
+    public function getSingleKeterserapan($id) {
+        $data = MainModel::getSingleData($id);
+
+        return response()->json($data);
+    }
+
+    public function editProcess(Request $request) {
+        $data_update = [
+            'jurusan' => $request->jurusan,
+            'thn_ajaran' => $request->tahun,
+            'jumlah' => $request->jumlah,
+            'kerja' => $request->kerja,
+            'kuliah' => $request->kuliah,
+            'wirausaha' => $request->wirausaha,
+            'militer' => $request->militer,
+            'lain' => $request->lain
+        ];
+        
+        $update = MainModel::updateData($request->id, $data_update);
+        
+        if ($update) {
+            return response()->json(['goal'=>true]);
+        } else {
+            return response()->json(['goal'=>false]);
+        }
     }
 
     public function getImage(Request $request) {
@@ -179,5 +232,30 @@ class MainController extends Controller
         }
 
         return response()->json(['goal'=>true, 'option'=>$data]);
+    }
+
+    public function exportPdf() {
+        $data = MainModel::dataKeterserapan();
+
+        $pdf = new Fpdf();
+        $pdf::AddPage();
+        $pdf::SetFont('Arial','B',18);
+        $pdf::Cell(0,10,"Data Keterserapan",0,"","C");
+        $pdf::Ln(20);
+
+        $pdf::SetWidths([5, 30, 22, 21, 21, 24, 21, 21, 25]);
+        $pdf::SetAligns(['L', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R']);
+        $border = [1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+        $pdf::SetFont('Arial','B',12);
+        $pdf::Row(['#', 'Thn Ajaran', 'Jurusan', 'Kerja', 'Kuliah', 'Wirausaha', 'Militer', 'Lain', 'Total'], $border);
+
+        $pdf::SetFont("Arial","",10);
+        $no = 1;
+        foreach ($data as $v) {
+            $pdf::Row([$no++, $v->tahun, $v->jurusan, $v->kerja, $v->kuliah, $v->wirausaha, $v->militer, $v->lain, $v->jumlah], $border);
+        }
+        $pdf::Output();
+        exit;
     }
 }

@@ -7,11 +7,19 @@ use DB;
 
 class PrakerinModel extends Model
 {
-    public static function getData($id = '', $field = 'a.id') {
+    public static function getData($id = '', $field = 'a.id', $filter = []) {
         $data = DB::table('prakerin AS a')
                 ->select(['a.*', 'pr.nama as perusahaan'])
                 ->leftJoin('perusahaan AS pr', 'pr.id', 'a.perusahaanid');
 
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('pr.nama', 'like', '%'.$filter['search'].'%');
+            });
+            $data->limit($filter['limit']);
+            $data->offset($filter['offset']);
+        }
+        
         if ($id) {
             $data->where($field, $id);
 
@@ -21,6 +29,20 @@ class PrakerinModel extends Model
         return $data->get();
     }
 
+    public static function rowCount($filter = []) {
+        $data = DB::table('prakerin AS a')
+                ->select(['a.*', 'pr.nama as perusahaan'])
+                ->leftJoin('perusahaan AS pr', 'pr.id', 'a.perusahaanid');
+        
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('pr.nama', 'like', '%'.$filter['search'].'%');
+            });
+        }
+        
+        return $data->count();
+    }
+
     public static function insertData($data) {
         $process = DB::table('prakerin')->insertGetId($data);
 
@@ -28,10 +50,15 @@ class PrakerinModel extends Model
     }
 
     public static function updateData($data, $id) {
-        $process = DB::table('prakerin')
-                    ->where('id', $id)
-                    ->update($data);
-        return $process;
+        try { 
+            $process = DB::table('prakerin')
+                        ->where('id', $id)
+                        ->update($data);
+                        // dd($id);
+            return $process;
+        } catch(\Illuminate\Database\QueryException $ex){ 
+            dd($ex->getMessage()); 
+        }
     }
 
     public static function deleteData($id){

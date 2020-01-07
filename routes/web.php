@@ -13,7 +13,9 @@
 |
 */
 Route::group(['middleware' => ['web']], function () {
-    Route::get('/', 'MainController@index');
+    Route::get('/', 'MainController@dashboard');
+    Route::get('/cari-lowongan', 'MainController@dashboard');
+    Route::get('/dashboard', 'MainController@index');
     Route::get('login', 'MainController@islogin');
     Route::post('login_p', 'MainController@login');
     Route::get('daftar', 'MainController@index');
@@ -27,6 +29,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/user/data/{id}', 'UserController@getUser');
     Route::post('/user/edit/{id}/process', 'UserController@editProcess');
     Route::post('/user/delete', 'UserController@deleteProcess');
+    Route::get('/user/report', 'UserController@exportPdf');
 
     Route::get('/perusahaan', 'MainController@index');
     Route::post('/perusahaan/table', 'PerusahaanController@table');
@@ -36,6 +39,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/perusahaan/data/{id}', 'PerusahaanController@getUser');
     Route::post('/perusahaan/edit/{id}/process', 'PerusahaanController@editProcess');
     Route::post('/perusahaan/delete', 'PerusahaanController@deleteProcess');
+    Route::get('/perusahaan/report', 'PerusahaanController@exportPdf');
 
     Route::get('/tahun-ajaran', 'MainController@index');
     Route::post('/tahun-ajaran/table', 'TahunController@table');
@@ -43,6 +47,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/tahun-ajaran/data/{id}', 'TahunController@getUser');
     Route::post('/tahun-ajaran/edit/process', 'TahunController@editProcess');
     Route::post('/tahun-ajaran/delete', 'TahunController@deleteProcess');
+    Route::get('/tahun-ajaran/report', 'TahunController@exportPdf');
 
     Route::get('/lowongan', 'MainController@index');
     Route::post('/lowongan/table', 'LowonganController@table');
@@ -52,6 +57,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/lowongan/edit/{id}', 'MainController@index');
     Route::post('/lowongan/edit/{id}/process', 'LowonganController@editProcess');
     Route::post('/lowongan/delete', 'LowonganController@deleteProcess');
+    Route::get('/lowongan/report', 'LowonganController@exportPdf');
     
     Route::get('/prakerin', 'MainController@index');
     Route::post('/prakerin/table', 'PrakerinController@table');
@@ -61,14 +67,24 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/prakerin/data/{id}', 'PrakerinController@getPrakerin');
     Route::post('/prakerin/edit/{id}/process', 'PrakerinController@editProcess');
     Route::post('/prakerin/delete', 'PrakerinController@deleteProcess');
+    Route::get('/prakerin/report', 'PrakerinController@exportPdf');
 
     Route::get('/tiket', 'MainController@index');
+    Route::post('/tiket/add', 'TiketController@addProcess');
     Route::post('/tiket/table', 'TiketController@table');
     Route::post('/tiket/delete', 'TiketController@deleteProcess');
+    Route::post('/tiket/check', 'TiketController@checkTiket');
+    Route::get('/tiket/report', 'TiketController@exportPdf');
     
+    Route::post('keterserapan', 'MainController@getKeterserapan');
+    Route::post('keterserapan/add', 'MainController@index');
+    Route::post('keterserapan/add/process', 'MainController@addProcess');
+    Route::post('keterserapan/edit/{id}', 'MainController@index');
+    Route::post('keterserapan/edit/{id}/process', 'MainController@getKeterserapan');
+    Route::get('keterserapan/report', 'MainController@exportPdf');
+
     Route::post('urlImage', 'MainController@getImage');
     Route::post('account', 'MainController@getAccount');
-    Route::post('keterserapan', 'MainController@getKeterserapan');
     
     Route::post('/option/usertype', 'MainController@optionsUsertype');
     Route::post('/option/tipelowongan', 'MainController@optionsTipeLowongan');

@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Anouar\Fpdf\Facades\Fpdf;
 use App\LowonganModel;
 
 class LowonganController extends Controller
 {
     public function table(Request $request) {
-        $data = LowonganModel::getData();
+        $filter = [];
+        $filter['limit'] = $request->limit[0]['value'];
+        $filter['search'] = $request->search ? $request->search : '';
+        $filter['offset'] = $request->offset*$filter['limit']-$filter['limit'];
+
+        $data = LowonganModel::getData('', '', $filter);
+        $count = LowonganModel::rowCount($filter);
 
         $lowongan = [];
         foreach($data as $row) {
@@ -28,11 +35,10 @@ class LowonganController extends Controller
             $lowongan[] = $result;
         }
         
-        return response()->json(['lowongan' =>$lowongan]);
+        return response()->json(['lowongan' => $lowongan, 'rows' => $count]);
     }
 
     public function addProcess(Request $request) {
-        dd($request->all());
         $perusahaan = $request->perusahaan['value'];
         $tipe = $request->tipe['value'];
         $jurusan = [];
@@ -122,5 +128,34 @@ class LowonganController extends Controller
         } else {
             return response()->json(['goal'=>false]);
         }
+    }
+
+    public function exportPdf() {
+        $data = LowonganModel::getData();
+
+        $pdf = new Fpdf();
+        $pdf::AddPage();
+        $pdf::SetFont('Arial','B',18);
+        $pdf::Cell(0,10,"Data Lowongan",0,"","C");
+        $pdf::Ln(20);
+
+        $pdf::SetWidths([5, 55, 30, 65, 30]);
+        $pdf::SetAligns(['L', 'L', 'L', 'L', 'L']);
+        $border = [1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+        $pdf::SetFont('Arial','B',12);
+        $thead = ['#', 'Perusahaan', 'Posisi', 'Syarat', 'Tgl Rekrut'];
+        $pdf::Row($thead, $border);
+
+        $pdf::SetFont("Arial","",10);
+        $no = 1;
+        foreach ($data as $v) {
+            $syarat = " - ".str_replace("$$", "\n - ", $v->syarat);
+            $tgl_rekrut = date_format(date_create($v->tgl_rekrutmen), 'd M Y');
+            $tbody = [$no++, $v->perusahaan, $v->posisi, $syarat, $tgl_rekrut];
+            $pdf::Row($tbody, $border);
+        }
+        $pdf::Output();
+        exit;
     }
 }

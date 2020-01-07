@@ -8,9 +8,15 @@ use App\TahunModel;
 class TahunController extends Controller
 {
     public function table(Request $request) {
-        $data = TahunModel::getData();
+        $filter = [];
+        $filter['limit'] = $request->limit[0]['value'];
+        $filter['search'] = $request->search ? $request->search : '';
+        $filter['offset'] = $request->offset*$filter['limit']-$filter['limit'];
+
+        $data = TahunModel::getData('', '', $filter);
+        $count = TahunModel::rowCount($filter);
         
-        return response()->json($data);
+        return response()->json(['table' => $data, 'rows' => $count]);
     }
 
     public function addProcess(Request $request) {

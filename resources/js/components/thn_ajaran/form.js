@@ -175,6 +175,7 @@ export default class FormThnAjaran extends Component {
                 <div className="col-md-12">
                     <label>
                         <h4 className="m-0">{this.state.title}</h4>
+                        {/* <DatePicker/> */}
                     </label>
                     <button className="close float-right" onClick={this.closeModal}>x</button>
                 </div>

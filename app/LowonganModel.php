@@ -16,27 +16,55 @@ class LowonganModel extends Model
             'a.posisi', 
             'a.deskripsi',
             'a.syarat', 
-            'a.tgl_rekrutmen',
+            // 'DATE_FORMAT(a.tgl_rekrutmen, "%d %M %Y")',
             'pr.nama as perusahaan',
-            'tp.nama as tipe'
+            'tp.nama as tipe',
+            'tk.pendaftar'
         );
         $data = DB::table('lowongan AS a')
                 ->select($select)
+                ->selectRaw('DATE_FORMAT(a.tgl_rekrutmen, "%d %M %Y") as tgl_rekrutmen')
                 ->leftJoin('perusahaan AS pr', 'pr.id', 'a.perusahaanid')
-                ->leftJoin('tipe AS tp', 'tp.id', 'a.tipeid');
+                ->leftJoin('tipe AS tp', 'tp.id', 'a.tipeid')
+                ->leftJoin(DB::raw('(SELECT count(id) as pendaftar, lowonganid FROM tiket GROUP BY lowonganid) tk'), 'tk.lowonganid', 'a.id');
 
         return $data;
     }
 
-    public static function getData($id = '', $field = 'a.id') {
+    public static function getData($id = '', $field = 'a.id', $filter = []) {
         $data = static::queryData();
+
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('a.posisi', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('pr.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('a.tgl_rekrutmen', 'like', '%'.$filter['search'].'%');
+            });
+            $data->limit($filter['limit']);
+            $data->offset($filter['offset']);
+        }
+
         if ($id) {
             $data->where($field, $id);
 
             return $data->first();
         }
-
+        
         return $data->get();
+    }
+
+    public static function rowCount($filter = []) {
+        $data = static::queryData();
+        
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('a.posisi', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('pr.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('a.tgl_rekrutmen', 'like', '%'.$filter['search'].'%');
+            });
+        }
+        
+        return $data->count();
     }
 
     public static function insertData($data) {

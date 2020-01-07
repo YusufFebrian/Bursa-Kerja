@@ -17,4 +17,25 @@ class TiketModel extends Model
 
         return $data->get();
     }
+
+    public static function insertData($data) {
+        $process = DB::table('tiket');
+
+        return $process->insert($data);
+    }
+
+    public static function getSingleData($id, $userid) {
+        $data = DB::table('tiket')
+                ->where('userid', $userid)
+                ->where('lowonganid', $id);
+
+        return $data->first();
+    }
+
+    public static function deleteData($id, $data) {
+        $process = DB::table('tiket')
+                ->where('id', $id);
+
+        return $process->delete($data);
+    }
 }

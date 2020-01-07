@@ -183,11 +183,15 @@ class Formuser extends Component {
             nama        : e.target.nama.value,
             username    : e.target.username.value,
             password    : e.target.password.value,
-            tipe        : this.state.settipe[0].value,
-            jurusan     : this.state.setjurusan[0].value,
-            tahun       : this.state.settahun[0].value,
-            perusahaan  : this.state.setperusahaan[0].value
+            tipe        : this.state.settipe[0].value
         };
+        if (data.tipe == 3 || data.tipe == 4) {
+            data.jurusan = this.state.setjurusan[0].value;
+            data.tahun = this.state.settahun[0].value;
+        } else if (data.tipe == 5) {
+            data.perusahaan = this.state.setperusahaan[0].value;
+        }
+
         Axios.post(this.props.match.url+'/process', data).then(response => {
             if (response.data.goal == true) {
                 this.props.history.push('/user');
@@ -207,7 +211,6 @@ class Formuser extends Component {
                                 <span class="panel-title">{this.state.type} User</span>
                                 <button type="submit" className="btn btn-primary float-right ml-1">Simpan</button>
                                 <LinkBack/>
-                                {/* <Kol lop='uyuyuyu' kdsa='cx'/> */}
                                 <button type="button" onClick={this.notif}>sa</button>
                             </div>
                             
@@ -245,7 +248,7 @@ class Formuser extends Component {
                                             placeholder="bkiuser123" 
                                             value={this.state.setpassword} 
                                             onChange={this.handleChange.bind(this)} 
-                                            required
+                                            required={this.state.type == 'Ubah' ? false : true}
                                             />
                                         </div>
                                     </div>

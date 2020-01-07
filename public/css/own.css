@@ -255,6 +255,12 @@ a {
     cursor: pointer;
 }
 
+.content-area {
+    background: url(../image/home-hero.jpg);
+    width: 100%;
+    padding: 90px 0;
+}
+
 .alert-label {
     writing-mode: vertical-lr;
     float: left;
@@ -284,4 +290,74 @@ a {
     flex: 3;
     /* text-transform: uppercase; */
     padding: 8px 10px;
+}
+
+@keyframes scroll {
+	0% { transform: translateX(0); }
+	100% { transform: translateX(calc(-250px * 7))}
+}
+
+.slider {
+	background: white;
+	height: 100px;
+	margin: auto;
+	overflow:hidden;
+	position: relative;
+    width: 100%;
+}
+
+.slider::before,
+.slider::after {
+    background: linear-gradient(to right,  rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+    content: "";
+    height: 100px;
+    position: absolute;
+    width: 100px;
+    z-index: 2;
+}
+
+.slider::after {
+    right: 0;
+    top: 0;
+    transform: rotateZ(180deg);
+}
+
+.slider::before {
+    left: 0;
+    top: 0;
+}
+
+.slide-track {
+    animation: scroll 20s linear infinite;
+    display: flex;
+    width: calc(250px * 12);
+}
+
+.slide {
+    height: 100px;
+    width: 250px;
+}
+
+.tbl-page {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #999;
+    background: #fff;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.tbl-page.active {
+    border: none;
+    background: #2176bd;
+    color: #fff;
+}
+
+.tbl-page:hover {
+    background: #00000021;
+}
+
+.tbl-page.active:hover {
+    background: #115994;
 }

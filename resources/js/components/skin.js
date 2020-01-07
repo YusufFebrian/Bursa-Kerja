@@ -3,7 +3,7 @@ import {BrowserRouter as Router, Route, withRouter} from 'react-router-dom';
 import Axios from 'axios';
 
 const LinkDashboard = withRouter(({ history }) => (
-    <div className="menu col-md-12 c-pointer" onClick={() => { history.push('/') }}>
+    <div className="menu col-md-12 c-pointer" onClick={() => { history.push('/dashboard') }}>
         <i className="fa fa-home"></i>
         <a className="ml-4">Dashboard</a>
     </div>
@@ -133,6 +133,7 @@ export default class Skin extends Component {
     }
 
     render(){
+        console.log(this.props.match);
         return (
             <span>
                 <div className="header">
@@ -142,27 +143,27 @@ export default class Skin extends Component {
                     </div>
                     <div className="float-right h-100 d-flex align-items-center">
                         <div className="dropdown h-100">
-                            <div class="dropdown-toggle h-100 px-2 pt-2 h2 m-0" data-toggle="dropdown" aria-expanded="false">
-                                <span class="fa-layers fa-fw">
-                                    <i class="fas fa-clipboard-check"></i>
-                                    <span class="fa-layers-counter h1 m-0" style={{background:"Tomato"}}>19</span>
+                            <div className="dropdown-toggle h-100 px-2 pt-2 h2 m-0" data-toggle="dropdown" aria-expanded="false">
+                                <span className="fa-layers fa-fw">
+                                    <i className="fas fa-clipboard-check"></i>
+                                    <span className="fa-layers-counter h1 m-0" style={{background:"Tomato"}}>19</span>
                                 </span>
                             </div>
-                            <div class="dropdown-menu" style={{width: '300px'}}>
+                            <div className="dropdown-menu" style={{width: '300px'}}>
                                 <div className="dropdown-item">Action</div>
                                 <a className="dropdown-item" href="#">Another action</a>
                                 <a className="dropdown-item" href="#">Something else here</a>
                             </div>
                         </div>
                         <div className="dropdown h-100">
-                            <div class="dropdown-toggle h-100 px-2 d-flex align-items-center" data-toggle="dropdown" aria-expanded="false">
+                            <div className="dropdown-toggle h-100 px-2 d-flex align-items-center" data-toggle="dropdown" aria-expanded="false">
                                 <img src="/image/default-user.png" height="37" className="img-circle" />
                                 <label className="h5 ml-3 mr-1" style={{textOverflow:'ellipsis', overflow:'hidden', width:'130px'}}>
                                     {this.state.name}
                                 </label>
-                                <i class="fas fa-angle-down"></i>
+                                <i className="fas fa-angle-down"></i>
                             </div>
-                            <div class="dropdown-menu" style={{width: '250px'}}>
+                            <div className="dropdown-menu" style={{width: '250px'}}>
                                 <div className="dropdown-item d-flex justify-content-center">
                                     <img src="/image/default-user.png" height="110" />
                                 </div>
@@ -207,7 +208,7 @@ export default class Skin extends Component {
                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i className="fa fa-clipboard-check"></i>
                         </div>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <a className="dropdown-item" href="#">Action</a>
                             <a className="dropdown-item" href="#">Another action</a>
                             <a className="dropdown-item" href="#">Something else here</a>

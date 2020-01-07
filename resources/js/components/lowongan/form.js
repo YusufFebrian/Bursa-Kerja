@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Axios from 'axios';
 import Select from 'react-dropdown-select';
 import Skin from '../skin';
+import Syarat from './syarat';
 
 class FormLowongan extends Component {
 
@@ -12,6 +13,7 @@ class FormLowongan extends Component {
         type: '',
         lastNum: 0,
         syarat : this.listSyarat,
+        syaratVal: {},
 
         id: '',
         setperusahaan: [],
@@ -26,16 +28,15 @@ class FormLowongan extends Component {
         optionsTipe: [],
         optionsJurusan: [],
 
-        // cobaElement: '',
-        // cobaValue: 'the value'
+        added: false,
       }
 
       this.addSyarat = this.addSyarat.bind(this);
+      this.editSyarat = this.editSyarat.bind(this);
       this.removeSyarat = this.removeSyarat.bind(this);
       this.handleChange = this.handleChange.bind(this);
-      
-    //   this.cobaRender = this.cobaRender.bind(this);
-    //   this.cobaChange = this.cobaChange.bind(this);
+      this.checkTiket = this.checkTiket.bind(this);
+      this.addTicket = this.addTicket.bind(this);
     };
 
     componentWillMount() {
@@ -44,17 +45,14 @@ class FormLowongan extends Component {
         this.optionsPerusahaan();
         this.optionsTipe();
         this.optionsJurusan();
-
-        // this.cobaRender();
     }
     
     formType() {
-        let userid = this.props.match.params.id;
+        let dataid = this.props.match.params.id;
         let that = this;
-        if (userid){
-            Axios.post('/lowongan/data/'+userid).then(response => {
+        if (dataid){
+            Axios.post('/lowongan/data/'+dataid).then(response => {
                 let data = response.data;
-                console.log(data.jurusan);
                 this.setState({
                     type: 'Ubah',
                     id: data.id,
@@ -75,6 +73,8 @@ class FormLowongan extends Component {
                 type: 'Tambah'
             })
         }
+        
+        this.checkTiket(dataid);
     }
 
     optionsPerusahaan() {
@@ -108,27 +108,30 @@ class FormLowongan extends Component {
     }
 
     addSyarat(value) {
-        if (typeof value != 'string') { value = '' };
+        if (typeof value != 'string') value = '';
         let num = this.state.lastNum;
         this.listSyarat.push(
-            <div id={"syarat-"+num} className="col-md-12 p-0 mb-1" key={num}>
-                <div className="col-md-1 p-0 mt-2 d-flex justify-content-center align-items-center">
-                    <i className="fas fa-dot-circle"></i>
-                </div>
-                <div className="col-md-9 p-0">
-                    <input name='input_syarat' className="form-control" placeholder="Pekerja Keras" value={value} onChange={this.handleChange}/>
-                </div>
-                <div className="col-md-2 pt-1"><button type="button" className="btn btn-danger" onClick={() => this.removeSyarat(num)}>
-                        <i className="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
+            <Syarat key={num} value={value} num={num} change={this.editSyarat} remove={this.removeSyarat} />
         );
+
+        let syaratVal = this.state.syaratVal;
+        syaratVal['val-'+num] = value;
         
         this.setState({
             syarat : this.listSyarat,
-            lastNum: num+1
+            lastNum: num+1,
+            syaratVal: syaratVal
         });
+    }
+
+    editSyarat(val, num) {
+        let syaratVal = this.state.syaratVal;
+        syaratVal['val-'+num] = val;
+
+        this.setState({
+            syaratVal: syaratVal
+        })
+        console.log(this.state.syaratVal)
     }
 
     removeSyarat(key_remove) {
@@ -140,9 +143,12 @@ class FormLowongan extends Component {
             }
         })
         old.splice(key_syarat, 1);
+        let syaratVal = this.state.syaratVal;
+        syaratVal['val-'+key_remove] = '';
+
         this.setState({
             syarat : this.listSyarat,
-            postVal : ""
+            syaratVal: syaratVal
         });
     }
 
@@ -155,12 +161,36 @@ class FormLowongan extends Component {
         })
     }
 
+    checkTiket(id) {
+        Axios.post('/tiket/check', {lowonganid: id}).then(response => {
+            if (response.data.goal == true) {
+                this.setState({
+                    added: true
+                })
+            }
+        }).catch(error => console.error(error));
+    }
+
+    addTicket() {
+        Axios.post('/tiket/add', {lowonganid: this.state.id}).then(response => {
+            if (response.data.goal == true) {
+                this.setState({
+                    added: true
+                })
+            }
+        }).catch(error => console.error(error));
+    }
+
     Submitter(el) {
         el.preventDefault();
+
         let syarat = [];
-        el.target.input_syarat.forEach(function(e){
-            syarat.push(e.value);
-        })
+        for (let key in this.state.syaratVal) {
+            if ( this.state.syaratVal[key] ) {
+                syarat.push(this.state.syaratVal[key])
+            }
+        }
+
         let data  = {
             id          : this.state.id,
             perusahaan  : this.state.setperusahaan[0],
@@ -178,30 +208,25 @@ class FormLowongan extends Component {
         }).catch(error => console.error(error));
     }
 
-    // cobaRender() {
-    //     let coba = <input type="text" name="coba" value={this.state.cobaValue} onChange={this.cobaChange.bind(this)} />;
-
-    //     this.setState({
-    //         cobaElement: coba
-    //     })
-    // }
-
-    // cobaChange(e) {
-    //     this.setState({
-    //         cobaValue: e.target.value
-    //     })
-    // }
-
     render() {
         return (
             <span>
                 <Skin/>
                 <div className="contents">
                     <form onSubmit={this.Submitter.bind(this)}>
-                        <div className="panel panel-warning">
+                        <div className="panel">
                             <div className="panel-heading" style={{fontSize: '24px', fontWeight: '800'}}>
                                 {this.state.type} Lowongan
                                 <button type="submit" className="btn btn-primary float-right ml-1">Simpan</button>
+                                {
+                                    (this.state.type == 'Ubah') &&
+                                    (this.state.added == false ? 
+                                        <button type="button" className="btn btn-warning float-right ml-1"
+                                        onClick={this.addTicket}>Daftar</button>
+                                    :
+                                        <button type="button" className="btn btn-warning disabled float-right ml-1">Terdaftar</button>
+                                    )
+                                }
                                 <button onClick={() => { this.props.history.push('/lowongan') }} 
                                 className="btn btn-danger float-right">
                                     <i className="fa fa-arrow-left"></i> Kembali
@@ -276,7 +301,7 @@ class FormLowongan extends Component {
                                             values={this.state.setjurusan}
                                             valueField='value'
                                             labelField='akronim'
-                                            onChange={(values) => {this.setState({setjurusan: values}); console.log(values)}}
+                                            onChange={(values) => {this.setState({setjurusan: values});}}
                                             />
                                         </div>
                                     </div>
@@ -293,7 +318,6 @@ class FormLowongan extends Component {
                                         {
                                             this.listSyarat
                                             // .map(function(val) { 
-                                            //     console.log(val);
                                             //     return val;
                                             // })
                                         }

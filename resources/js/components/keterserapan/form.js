@@ -88,6 +88,23 @@ export default class Formserap extends Component {
 
     Submitter(e) {
         e.preventDefault();
+
+        let data = {
+            jurusan: this.state.setjurusan[0].value,
+            tahun: this.state.settahun[0].value,
+            jumlah: this.state.setjumlah,
+            kerja: this.state.setkerja,
+            kuliah: this.state.setkuliah,
+            wirausaha: this.state.setwirausaha,
+            militer: this.state.setmiliter,
+            lain: this.state.setlain
+        };
+
+        Axios.post(this.props.match.url+'/process', data).then(response => {
+            if (response.data.goal == true) {
+                this.props.history.push('/dashboard');
+            }
+        }).catch(error => console.error(error))
     }
 
     render() {
@@ -102,7 +119,8 @@ export default class Formserap extends Component {
                                 <button type="submit" className="btn btn-primary float-right ml-1">
                                     <i className="fa fa-save"></i> Simpan
                                 </button>
-                                <button className="btn btn-danger float-right ml-1">
+                                <button onClick={() => { this.props.history.push('/dashboard') }} 
+                                className="btn btn-danger float-right">
                                     <i className="fa fa-arrow-left"></i> Kembali
                                 </button>
                             </div>

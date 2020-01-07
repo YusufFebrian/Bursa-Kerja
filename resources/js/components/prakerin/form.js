@@ -13,6 +13,7 @@ const LinkBack = withRouter(({ history }) => (
 export default class Formprakerin extends Component {
     constructor(){
         super();
+        
         this.listSiswa = [];
         this.state = {
             type: '',
@@ -20,6 +21,7 @@ export default class Formprakerin extends Component {
             listKey: [],
             listVal: [],
             siswa : this.listSiswa,
+            values : [],
 
             id: '',
             setperusahaan: [],
@@ -32,6 +34,7 @@ export default class Formprakerin extends Component {
         this.addSiswa = this.addSiswa.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.removeSiswa = this.removeSiswa.bind(this);
+        this.Submitter = this.Submitter.bind(this);
     }
 
     componentWillMount() {
@@ -85,13 +88,18 @@ export default class Formprakerin extends Component {
     
     addSiswa(value = []) {
         let num = this.state.lastNum;
+        let listkey = this.state.listKey;
+        listkey.push(num);
+        // console.log(listkey)
+        // console.log(this.listSiswa)
+
         this.setState({
-            listKey: this.state.listKey.push([num])
+            listKey: listkey
         })
         this.listSiswa.push(
             <div id={"siswa-"+num} className="col-md-12 p-0 mb-1" key={num}>
                 <div className="col-md-1 p-0 mt-2 d-flex justify-content-center align-items-center">
-                    <i className="fas fa-dot-circle"></i>
+                    <i className=   "fas fa-dot-circle"></i>
                 </div>
                 <div className="col-md-9 p-0">
                     <Select 
@@ -99,7 +107,7 @@ export default class Formprakerin extends Component {
                     name="select_siswa"
                     options={this.state.optionsSiswa} 
                     values={value}
-                    onChange={(values) => {} }
+                    onChange={(values) => {this.handleChange(num, values)} }
                     />
                 </div>
                 <div className="col-md-2 pt-1"><button type="button" className="btn btn-danger" onClick={() => this.removeSiswa(num)}>
@@ -117,43 +125,49 @@ export default class Formprakerin extends Component {
 
     removeSiswa(key_remove) {
         let old = this.listSiswa;
+        let oldlistKey = this.state.listKey;
         let key_siswa = 0;
         old.forEach(function(val, i){
             if (val.key == key_remove) {
                 key_siswa = i;
             }
         })
+
         old.splice(key_siswa, 1);
+        oldlistKey.splice(key_siswa, 1);
+
         this.setState({
             siswa : this.listSiswa,
+            listKey : oldlistKey,
             postVal : ""
         });
     }
 
-    handleChange(e) {
-        let {name, value} = e.target;
-        let statenm = 'set'+name;
+    handleChange(key, val) {
+        let values = this.state.values;
+        let statenm = 'set_'+key;
+        values[statenm] = val;
 
         this.setState({
-            [statenm]: value
+            values: values
         })
     }
 
     Submitter(e) {
         e.preventDefault();
-        let syarat = [];
-        e.target.select.forEach(function(e){
-            syarat.push(e.value);
+        let siswa = [];
+        let that = this;
+        this.listSiswa.forEach(function(e){
+            if (that.state.values['set_'+e.key].length) {
+                siswa.push(that.state.values['set_'+e.key][0].value);
+            }
         })
         let data = {
             id          : this.state.id,
-            nama        : e.target.nama.value,
-            alamat      : e.target.alamat.value,
-            email       : e.target.email.value,
-            notelp      : e.target.notelp.value,
-            nama_hrd    : e.target.nama_hrd.value,
-            notelp_hrd  : e.target.notelp_hrd.value
+            perusahaan  : this.state.setperusahaan[0].value,
+            siswa       : siswa
         };
+        
         Axios.post(this.props.match.url+'/process', data).then(response => {
             if (response.data.goal == true) {
                 this.props.history.push('/prakerin');
@@ -195,9 +209,7 @@ export default class Formprakerin extends Component {
                                     </div>
                                     <div id="list-siswa" className="col-md-12">
                                         {
-                                            this.listSiswa
-                                            .map(function(val) { 
-                                                console.log(val);
+                                            this.listSiswa.map(function(val) { 
                                                 return val;
                                             })
                                         }

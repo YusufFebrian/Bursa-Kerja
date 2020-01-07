@@ -7,8 +7,17 @@ use DB;
 
 class TahunModel extends Model
 {
-    public static function getData($id = '', $field = 'id') {
+    public static function getData($id = '', $field = 'id', $filter = []) {
         $data = DB::table('thn_ajaran');
+
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('tahun', 'like', '%'.$filter['search'].'%');
+            });
+            $data->limit($filter['limit']);
+            $data->offset($filter['offset']);
+        }
+
         if ($id) {
             $data->where($field, $id);
 
@@ -16,6 +25,18 @@ class TahunModel extends Model
         }
 
         return $data->get();
+    }
+
+    public static function rowCount($filter = []) {
+        $data = DB::table('thn_ajaran');
+        
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('tahun', 'like', '%'.$filter['search'].'%');
+            });
+        }
+        
+        return $data->count();
     }
 
     public static function insertData($data) {

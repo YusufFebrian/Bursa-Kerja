@@ -24,15 +24,30 @@ class MainModel extends Model
     }
 
     public static function dataKeterserapan($thn = '', $prodi = '', $jurusan = ''){
-        $data = DB::table('keterserapan')
-                ->join('jurusan', 'jurusan.id', 'keterserapan.jurusanid');
+        $data = DB::table('keterserapan AS a')
+                ->select(['a.*', 'th.tahun', 'jr.akronim as jurusan'])
+                ->join('thn_ajaran AS th', 'th.id', 'a.thn_ajaran')
+                ->join('jurusan AS jr', 'jr.id', 'a.jurusanid');
         if ($thn)
             $data->where('thn_ajaran', $thn);
         if ($prodi)
-            $data->where('jurusan.prodi', $prodi);
+            $data->where('jr.prodi', $prodi);
         if ($jurusan)
-            $data->where('jurusan.id', $jurusan);
+            $data->where('jr.id', $jurusan);
         return $data->get();
+    }
+
+    public static function insertData($data) {
+        $process = DB::table('keterserapan')->insertGetId($data);
+
+        return $process;
+    }
+
+    public static function updateData($id, $data) {
+        $process = DB::table('keterserapan')
+                ->where('id', $id);
+
+        return $process->update($data);
     }
 
     public static function usertypeData() {

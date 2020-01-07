@@ -17,6 +17,8 @@ import {BrowserRouter as Router, Route} from 'react-router-dom';
 import { Provider, positions } from "react-alert";
 import AlertTemplate from "react-alert-template-oldschool-dark";
 import Index from './components/index';
+import Dashboard from './components/dashboard';
+import viewLowongan from './components/land/lowongan';
 import Login from './components/login';
 import Daftar from './components/daftar';
 import User from './components/user';
@@ -44,6 +46,8 @@ export default class Apps extends Component {
                         <Route path="/login" exact component={Login}/>
                         <Route path="/daftar" exact component={Daftar}/>
                         <Route path="/" exact component={Index}/>
+                        <Route path="/dashboard" exact component={Dashboard}/>
+                        <Route path="/cari-lowongan" exact component={viewLowongan}/>
 
                         <Route path="/user" exact component={User}/>
                         <Route path="/user/add" exact component={Formuser}/>

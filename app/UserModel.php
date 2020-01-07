@@ -30,8 +30,21 @@ class UserModel extends Model
         return $data;
     }
 
-    public static function getData($id = '', $field = 'a.id') {
+    public static function getData($id = '', $field = 'a.id', $filter = []) {
         $data = static::queryData();
+
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('a.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('tp.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('jr.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('ta.tahun', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('pr.nama', 'like', '%'.$filter['search'].'%');
+            });
+            $data->limit($filter['limit']);
+            $data->offset($filter['offset']);
+        }
+
         if ($id) {
             $data->where($field, $id);
 
@@ -39,6 +52,22 @@ class UserModel extends Model
         }
 
         return $data->get();
+    }
+
+    public static function rowCount($filter = []) {
+        $data = static::queryData();
+        
+        if ($filter) {
+            $data->where(function($query) use ($filter) {
+                $query->where('a.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('tp.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('jr.nama', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('ta.tahun', 'like', '%'.$filter['search'].'%');
+                $query->orWhere('pr.nama', 'like', '%'.$filter['search'].'%');
+            });
+        }
+        
+        return $data->count();
     }
 
     public static function insertData($data) {

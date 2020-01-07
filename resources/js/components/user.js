@@ -5,6 +5,7 @@ import Axios from 'axios';
 // import 'rodal/lib/rodal.css';
 import Modal from 'react-modal';
 import Skin from './skin';
+import Select from 'react-dropdown-select';
 
 const LinkAdd = withRouter(({ history }) => (
     <button onClick={() => { history.push('/user/add') }} className="btn btn-success float-right">
@@ -27,26 +28,35 @@ export default class User extends Component {
     constructor(){
         super();
         this.state = {
+            setSearch: '',
+            setShow: 'Showing 10 from 100 data',
+            setOffset: '1',
+            setLimit: [{label: '10', value: 10}],
+            setRows: 0,
             tbody: "",
+
             visible: false,
             modalIsOpen: false,
             userid: 0
         }
         this.actionClick = this.actionClick.bind(this);
+        this.tableControl = this.tableControl.bind(this);
         this.openModal = this.openModal.bind(this);
         this.afterOpenModal = this.afterOpenModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
     }
 
     componentWillMount() {
-        this.renderTbody();
+        this.tableControl();
     }
 
-    renderTbody(){
-        Axios.post('/user/table').then(response => {
-            let num = 1;
+    renderTbody(filter){
+        Axios.post('/user/table', filter).then(response => {
+            let limit = filter.limit[0].value;
+            let num = filter.offset*limit-limit;
+            let fNum = num+1;
             let tbody = "";
-            response.data.forEach(value => {
+            response.data.table.forEach(value => {
                 let editBtn = "<button tipe='edit' userid='"+ value.id +"' class='btn btn-primary btn-sm mr-1'>"+
                                 "<i class='fa fa-edit'></i>"+
                             "</button>";
@@ -54,17 +64,21 @@ export default class User extends Component {
                                     "<i class='fa fa-trash'></i>"+
                                 "</button>";
                 tbody += "<tr>";
-                    tbody += "<td>"+ (num++) +"</td>";
+                    tbody += "<td>"+ (++num) +"</td>";
                     tbody += "<td>"+ value.nama +"</td>";
                     tbody += "<td>"+ value.tipe +"</td>";
-                    tbody += "<td>"+ value.jurusan +"</td>";
-                    tbody += "<td>"+ value.tahun +"</td>";
-                    tbody += "<td>"+ value.perusahaan +"</td>";
+                    tbody += "<td>"+ (value.jurusan ? value.jurusan : '-') +"</td>";
+                    tbody += "<td>"+ (value.tahun ? value.tahun : '-') +"</td>";
+                    tbody += "<td>"+ (value.perusahaan ? value.perusahaan : '-') +"</td>";
                     tbody += "<td>"+ editBtn+" "+deleteBtn +"</td>";
                 tbody += "</tr>";
             });
+            
+            let lNum = num  ;
             this.setState({
-                tbody: tbody
+                tbody: tbody,
+                setShow: `Showing ${fNum} to ${lNum} from ${response.data.rows} data`,
+                setRows: response.data.rows
             })
         }).catch(error => console.error(error));
     }
@@ -84,6 +98,24 @@ export default class User extends Component {
             this.setState({modalIsOpen: true, userid: el.getAttribute('userid')});
 
         }
+    }
+
+    tableControl(el = -1, type = '') {
+        let filter = {};
+        filter.limit = this.state.setLimit;
+        filter.search = this.state.setSearch;
+
+        if (el != -1) {
+            if (type != 'Offset') {
+                filter.offset = 1;
+                this.setState({ setOffset: 1 })
+            }
+            
+            filter[type.toLowerCase()] = el;
+            this.setState({ ['set'+type]: el })
+        }
+
+        this.renderTbody(filter);
     }
 
     hideRodal(){
@@ -106,13 +138,27 @@ export default class User extends Component {
         Axios.post('/user/delete', data).then(response => {
             if (response.data.goal == true){
                 this.setState({modalIsOpen: false});
-                console.log('deleted');
-                this.renderTbody();
+                
+                this.tableControl();
             }
         }).catch(error => console.error(error));
     }
 
     render() {
+        let optionsLimit = [
+            {label: '10', value: 10},
+            {label: '25', value: 25},
+            {label: '50', value: 50},
+            {label: '100', value: 100}
+        ];
+
+        let toOffset = Math.ceil(this.state.setRows / this.state.setLimit[0].value);
+        let offsets = [{label: '<<', value: 1}];
+        for (let i = 1; i <= toOffset; i++) {
+            offsets.push({label: i, value: i});
+        }
+        offsets.push({label: '>>', value: toOffset});
+
         return (
             <span>
                 <Skin/>
@@ -123,6 +169,21 @@ export default class User extends Component {
                         <LinkAdd/>
                     </div>
                     <div className="panel-body">
+                        <div className="col-lg-3 mb-2 p-0">
+                            <label className="col-lg-3 p-0 font-weight-bold">Show</label>
+                            <div className="col-lg-8">
+                                <Select className="form-control" id="tbl-limit" options={optionsLimit}
+                                onChange={(e) => this.tableControl(e, 'Limit')} values={this.state.setLimit}/>
+                            </div>
+                        </div>
+
+                        <div className="col-lg-4 mb-2 p-0 offset-lg-5">
+                            <label className="col-lg-3 font-weight-bold">Search</label>
+                            <div className="col-lg-9 pr-0">
+                                <input type="text" className="form-control" id="tbl-search" placeholder="Search..."
+                                onChange={(e) => this.tableControl(e.target.value, 'Search')} value={this.state.setSearch} />
+                            </div>
+                        </div>
                         <table className="table table-bordered">
                             <thead>
                                 <tr>
@@ -137,6 +198,20 @@ export default class User extends Component {
                             </thead>
                             <tbody onClick={this.actionClick} dangerouslySetInnerHTML={{__html: this.state.tbody}}/>
                         </table>
+                        <div className="col-lg-6 mt-2 p-0">
+                            <label>{this.state.setShow}</label>
+                        </div>
+                        <div className="col-lg-6 mt-2 p-0 d-flex justify-content-end">
+                            {offsets.map((e, i) => {
+                                let active = (this.state.setOffset == e.label) ? 'active' : '';
+                                return (
+                                    <button className={'tbl-page '+active} key={i}
+                                    onClick={() => this.tableControl(e.value, 'Offset')}>
+                                        {e.label}
+                                    </button>
+                                )
+                            })}
+                        </div>
                     {/* <Modal isOpen={this.state.modalIsOpen}
                     onAfterOpen={this.afterOpenModal}
                     onRequestClose={this.closeModal}
